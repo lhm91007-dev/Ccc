@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Mulltidigitalcr</title>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 10px;
+    }
+
+    /* Modal de Registro */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .modal-card {
+      background: #1e293b;
+      padding: 24px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      border: 1px solid #475569;
+    }
+
+    .modal-card h2 {
+      text-align: center;
+      margin-bottom: 8px;
+      color: #3b82f6;
+    }
+
+    .modal-card p {
+      font-size: 13px;
+      color: #94a3b8;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      margin-bottom: 14px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: #cbd5e1;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: white;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .input-group input:focus {
+      border-color: #3b82f6;
+    }
+
+    .btn-register {
+      width: 100%;
+      padding: 12px;
+      background: #2563eb;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 10px;
+    }
+
+    .btn-register:hover {
+      background: #1d4ed8;
+    }
+
+    /* Main Container */
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+      height: 94vh;
+      background: #1e293b;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      background-color: #334155;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #475569;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #60a5fa;
+    }
+
+    .status-badge {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: #ef4444;
+      font-weight: 600;
+    }
+
+    /* Video Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 10px;
+      background: #090d16;
+      max-height: 250px;
+      min-height: 180px;
+    }
+
+    .video-container {
+      position: relative;
+      background: #1e293b;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .video-label {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* Controls */
+    .call-controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px;
+      background: #1e293b;
+      border-bottom: 1px solid #475569;
+    }
+
+    .btn {
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      transition: background 0.2s;
+      font-size: 13px;
+    }
+
+    .btn-call { background: #22c55e; }
+    .btn-call:hover { background: #16a34a; }
+
+    .btn-screen { background: #3b82f6; }
+    .btn-screen:hover { background: #2563eb; }
+
+    .btn-hangup { background: #ef4444; }
+    .btn-hangup:hover { background: #dc2626; }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Chat Messages */
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #0f172a;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .message.sent {
+      align-self: flex-end;
+      background-color: #2563eb;
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+
+    .message.received {
+      align-self: flex-start;
+      background-color: #334155;
+      color: white;
+      border-bottom-left-radius: 2px;
+    }
+
+    .message .sender-id {
+      font-size: 11px;
+      font-weight: bold;
+      opacity: 0.8;
+      margin-bottom: 4px;
+      display: block;
+      color: #93c5fd;
+    }
+
+    /* Chat Input */
+    .chat-input-area {
+      padding: 12px;
+      background: #1e293b;
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid #475569;
+      border-radius: 20px;
+      outline: none;
+      background: #0f172a;
+      color: white;
+      font-size: 14px;
+    }
+
+    .chat-input-area button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+        max-height: 300px;
+      }
+    }
+  </style>
+
+  <!-- Socket.IO Client -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+
+  <!-- Modal de Registro -->
+  <div class="modal-overlay" id="registerModal">
+    <div class="modal-card">
+      <h2>Chat Mulltidigitalcr</h2>
+      <p>Ingresa tus datos para continuar</p>
+      <form id="registerForm">
+        <div class="input-group">
+          <label for="userNameInput">Nombre Completo</label>
+          <input type="text" id="userNameInput" placeholder="Ej: Juan Pérez" required autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label for="userPhoneInput">Número de Teléfono</label>
+          <input type="tel" id="userPhoneInput" placeholder="Ej: +506 8888 8888" required autocomplete="off">
+        </div>
+        <button type="submit" class="btn-register">Ingresar al Chat</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Aplicación Principal -->
+  <div class="app-container">
+    <div class="header">
+      <span class="brand-title">Chat Mulltidigitalcr</span>
+      <span id="status" class="status-badge">Desconectado</span>
+    </div>
+
+    <!-- Panel Video / Pantalla -->
+    <div class="video-grid">
+      <div class="video-container">
+        <video id="localVideo" autoplay playsinline muted></video>
+        <span class="video-label" id="localVideoLabel">Tú</span>
+      </div>
+      <div class="video-container">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <span class="video-label">Remoto</span>
+      </div>
+    </div>
+
+    <!-- Controles -->
+    <div class="call-controls">
+      <button id="startCallBtn" class="btn btn-call">Iniciar Videollamada</button>
+      <button id="screenShareBtn" class="btn btn-screen" disabled>Compartir Pantalla</button>
+      <button id="hangupBtn" class="btn btn-hangup" disabled>Colgar</button>
+    </div>
+
+    <!-- Mensajes -->
+    <div class="chat-messages" id="messages"></div>
+
+    <!-- Input Chat -->
+    <form class="chat-input-area" id="chatForm">
+      <input type="text" id="messageInput" placeholder="Escribe un mensaje..." autocomplete="off" required>
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <!-- Lógica Principal (Socket.IO + WebRTC + Firebase) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      query, 
+      orderBy, 
+      onSnapshot, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ==========================================
+    // CONFIGURACIÓN DE FIREBASE 
+    // (Credenciales de ejemplo listas para pruebas o reemplázalas por las tuyas)
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDummyKeyForTestingPurposesOnly12345",
+      authDomain: "chat-mulltidigitalcr.firebaseapp.com",
+      projectId: "chat-mulltidigitalcr",
+      storageBucket: "chat-mulltidigitalcr.appspot.com",
+      messagingSenderId: "123456789012",
+      appId: "1:123456789012:web:abcdef123456789"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const BACKEND_URL = "https://webrtc-backend-avsg.onrender.com";
+
+    const rtcConfiguration = {
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" }
+      ]
+    };
+
+    let socket;
+    let localStream;
+    let remoteStream;
+    let peerConnection;
+    let isSharingScreen = false;
+    let camVideoTrackBackup = null;
+
+    let currentUser = { name: "", phone: "" };
+
+    const registerModal = document.getElementById("registerModal");
+    const registerForm = document.getElementById("registerForm");
+    const userNameInput = document.getElementById("userNameInput");
+    const userPhoneInput = document.getElementById("userPhoneInput");
+    const localVideoLabel = document.getElementById("localVideoLabel");
+
+    const statusEl = document.getElementById("status");
+    const messagesEl = document.getElementById("messages");
+    const chatForm = document.getElementById("chatForm");
+    const messageInput = document.getElementById("messageInput");
+
+    const localVideo = document.getElementById("localVideo");
+    const remoteVideo = document.getElementById("remoteVideo");
+    const startCallBtn = document.getElementById("startCallBtn");
+    const screenShareBtn = document.getElementById("screenShareBtn");
+    const hangupBtn = document.getElementById("hangupBtn");
+
+    // Verificar si ya hay sesión guardada
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedUser = localStorage.getItem("mulltidigitalcr_user");
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        registerModal.style.display = "none";
+        localVideoLabel.textContent = currentUser.name;
+        initApp();
+      }
+    });
+
+    registerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = userNameInput.value.trim();
+      const phone = userPhoneInput.value.trim();
+
+      if (name && phone) {
+        currentUser = { name, phone };
+        localStorage.setItem("mulltidigitalcr_user", JSON.stringify(currentUser));
+        registerModal.style.display = "none";
+        localVideoLabel.textContent = currentUser.name;
+        initApp();
+      }
+    });
+
+    function initApp() {
+      initSocket();
+      listenFirestoreMessages();
+    }
+
+    // Escuchar mensajes en tiempo real desde Firestore
+    function listenFirestoreMessages() {
+      const q = query(collection(db, "mensajes"), orderBy("timestamp", "asc"));
+      
+      onSnapshot(q, (snapshot) => {
+        messagesEl.innerHTML = "";
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const isMe = data.senderPhone === currentUser.phone;
+          const type = isMe ? "sent" : "received";
+          const senderInfo = isMe ? "Tú" : `${data.senderName || 'Anónimo'} (${data.senderPhone || ''})`;
+          
+          appendMessage(data.text, type, senderInfo);
+        });
+      }, (error) => {
+        console.warn("Aviso de Firestore: Asegúrate de configurar tus reglas o proyecto real si usas base de datos propia.", error);
+      });
+    }
+
+    function initSocket() {
+      if (socket) return;
+
+      socket = io(BACKEND_URL, {
+        transports: ["websocket", "polling"]
+      });
+
+      socket.on("connect", () => {
+        statusEl.textContent = "Conectado";
+        statusEl.style.background = "#22c55e";
+      });
+
+      socket.on("disconnect", () => {
+        statusEl.textContent = "Desconectado";
+        statusEl.style.background = "#ef4444";
+      });
+
+      socket.on("connect_error", () => {
+        statusEl.textContent = "Error de conexión";
+        statusEl.style.background = "#ef4444";
+      });
+
+      // --- SEÑALIZACIÓN WEBRTC ---
+      socket.on("offer", async (data) => {
+        if (!peerConnection) createPeerConnection();
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+        
+        if (!localStream) {
+          await getMedia();
+        }
+
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit("answer", { answer });
+        
+        hangupBtn.disabled = false;
+        screenShareBtn.disabled = false;
+      });
+
+      socket.on("answer", async (data) => {
+        if (peerConnection) {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        }
+      });
+
+      socket.on("candidate", async (data) => {
+        if (peerConnection && data.candidate) {
+          try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+          } catch (e) {
+            console.error("Error agregando candidato ICE:", e);
+          }
+        }
+      });
+
+      socket.on("hangup", () => {
+        closeCall();
+      });
+    }
+
+    async function getMedia() {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
+
+        if (peerConnection) {
+          localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+          });
+        }
+      } catch (err) {
+        console.error("Error al acceder a dispositivos de medios:", err);
+        alert("No se pudo acceder a la cámara o micrófono.");
+      }
+    }
+
+    function createPeerConnection() {
+      peerConnection = new RTCPeerConnection(rtcConfiguration);
+
+      remoteStream = new MediaStream();
+      remoteVideo.srcObject = remoteStream;
+
+      peerConnection.ontrack = (event) => {
+        event.streams[0].getTracks().forEach(track => {
+          remoteStream.addTrack(track);
+        });
+      };
+
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit("candidate", { candidate: event.candidate });
+        }
+      };
+
+      if (localStream) {
+        localStream.getTracks().forEach(track => {
+          peerConnection.addTrack(track, localStream);
+        });
+      }
+    }
+
+    startCallBtn.addEventListener("click", async () => {
+      startCallBtn.disabled = true;
+      hangupBtn.disabled = false;
+      screenShareBtn.disabled = false;
+
+      await getMedia();
+      createPeerConnection();
+
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      socket.emit("offer", { offer });
+    });
+
+    screenShareBtn.addEventListener("click", async () => {
+      if (!isSharingScreen) {
+        try {
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+          const screenTrack = screenStream.getVideoTracks()[0];
+
+          camVideoTrackBackup = localStream.getVideoTracks()[0];
+
+          const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+          if (sender) {
+            await sender.replaceTrack(screenTrack);
+          }
+
+          localVideo.srcObject = screenStream;
+          isSharingScreen = true;
+          screenShareBtn.textContent = "Detener Pantalla";
+          screenShareBtn.style.background = "#eab308";
+
+          screenTrack.onended = () => {
+            stopScreenSharing();
+          };
+
+        } catch (err) {
+          console.error("Error al compartir pantalla:", err);
+        }
+      } else {
+        stopScreenSharing();
+      }
+    });
+
+    async function stopScreenSharing() {
+      if (!isSharingScreen) return;
+
+      const screenTrack = localVideo.srcObject.getVideoTracks()[0];
+      if (screenTrack) screenTrack.stop();
+
+      if (camVideoTrackBackup && peerConnection) {
+        const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) {
+          await sender.replaceTrack(camVideoTrackBackup);
+        }
+      }
+
+      localVideo.srcObject = localStream;
+      isSharingScreen = false;
+      screenShareBtn.textContent = "Compartir Pantalla";
+      screenShareBtn.style.background = "#3b82f6";
+    }
+
+    hangupBtn.addEventListener("click", () => {
+      socket.emit("hangup");
+      closeCall();
+    });
+
+    function closeCall() {
+      stopScreenSharing();
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      localVideo.srcObject = null;
+      remoteVideo.srcObject = null;
+      startCallBtn.disabled = false;
+      screenShareBtn.disabled = true;
+      hangupBtn.disabled = true;
+      isSharingScreen = false;
+      screenShareBtn.textContent = "Compartir Pantalla";
+      screenShareBtn.style.background = "#3b82f6";
+    }
+
+    // Enviar mensaje a Firestore
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = messageInput.value.trim();
+      
+      if (text) {
+        try {
+          await addDoc(collection(db, "mensajes"), {
+            text: text,
+            senderName: currentUser.name,
+            senderPhone: currentUser.phone,
+            timestamp: serverTimestamp()
+          });
+          messageInput.value = "";
+        } catch (error) {
+          console.error("Error al guardar mensaje en Firestore:", error);
+          alert("Error al enviar mensaje. Verifica tu configuración de Firebase.");
+        }
+      }
+    });
+
+    function appendMessage(text, type, sender) {
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("message", type);
+
+      const senderSpan = document.createElement("span");
+      senderSpan.classList.add("sender-id");
+      senderSpan.textContent = sender;
+
+      messageDiv.appendChild(senderSpan);
+      messageDiv.appendChild(document.createTextNode(text));
+
+      messagesEl.appendChild(messageDiv);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+  </script>
+</body>
+</html>
